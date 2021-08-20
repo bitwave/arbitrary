@@ -48,6 +48,10 @@ use core::time::Duration;
 extern crate alloc;
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
+#[cfg(not(feature = "std"))]
+use alloc::boxed::Box;
+#[cfg(not(feature = "std"))]
+use alloc::string::String;
 
 #[cfg(feature = "std")]
 use std::borrow::{Cow, ToOwned};
@@ -881,7 +885,6 @@ impl<'a> Arbitrary<'a> for &'a str {
     }
 }
 
-#[cfg(feature = "std")]
 impl<'a> Arbitrary<'a> for String {
     fn arbitrary(u: &mut Unstructured<'a>) -> Result<Self> {
         <&str as Arbitrary>::arbitrary(u).map(Into::into)
@@ -936,7 +939,6 @@ impl<'a> Arbitrary<'a> for PathBuf {
     }
 }
 
-#[cfg(feature = "std")]
 impl<'a, A: Arbitrary<'a>> Arbitrary<'a> for Box<A> {
     fn arbitrary(u: &mut Unstructured<'a>) -> Result<Self> {
         Arbitrary::arbitrary(u).map(Self::new)
@@ -948,7 +950,6 @@ impl<'a, A: Arbitrary<'a>> Arbitrary<'a> for Box<A> {
     }
 }
 
-#[cfg(feature = "std")]
 impl<'a, A: Arbitrary<'a>> Arbitrary<'a> for Box<[A]> {
     fn arbitrary(u: &mut Unstructured<'a>) -> Result<Self> {
         <Vec<A> as Arbitrary>::arbitrary(u).map(|x| x.into_boxed_slice())
@@ -960,7 +961,6 @@ impl<'a, A: Arbitrary<'a>> Arbitrary<'a> for Box<[A]> {
     }
 }
 
-#[cfg(feature = "std")]
 impl<'a> Arbitrary<'a> for Box<str> {
     fn arbitrary(u: &mut Unstructured<'a>) -> Result<Self> {
         <String as Arbitrary>::arbitrary(u).map(|x| x.into_boxed_str())

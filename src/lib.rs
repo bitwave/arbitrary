@@ -1160,6 +1160,18 @@ impl<'a, T> Arbitrary<'a> for *mut T {
     }
 }
 
+impl<'a, T> Arbitrary<'a> for *const T {
+    fn arbitrary(u: &mut Unstructured<'a>) -> Result<Self> {
+        Ok(<*mut T>::arbitrary(u)?)
+    }
+
+    #[inline]
+    fn size_hint(_depth: usize) -> (usize, Option<usize>) {
+        let len = mem::size_of::<*mut T>();
+        (len, Some(len))
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -1258,6 +1270,9 @@ mod test {
     fn arbitrary_pointers() {
         let x = [1, 2, 3, 4];
         assert_eq!(<*mut i64 as Arbitrary>::arbitrary(&mut Unstructured::new(&x)).unwrap(), 0x4030201 as *mut i64);
-        assert_eq!(<*mut Box<u64> as Arbitrary>::arbitrary(&mut Unstructured::new(&x)).unwrap(), 0x4030201 as *mut Box<u64>)
+        assert_eq!(<*const i64 as Arbitrary>::arbitrary(&mut Unstructured::new(&x)).unwrap(), 0x4030201 as *const i64);
+
+        assert_eq!(<*const Box<u64> as Arbitrary>::arbitrary(&mut Unstructured::new(&x)).unwrap(), 0x4030201 as *const Box<u64>);
+        assert_eq!(<*const Box<u64> as Arbitrary>::arbitrary(&mut Unstructured::new(&x)).unwrap(), 0x4030201 as *const Box<u64>);
     }
 }

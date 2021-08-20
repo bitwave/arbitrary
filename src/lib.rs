@@ -1142,6 +1142,24 @@ impl<'a> Arbitrary<'a> for Ipv6Addr {
     }
 }
 
+impl<'a, T> Arbitrary<'a> for *mut T {
+    fn arbitrary(u: &mut Unstructured<'a>) -> Result<Self> {
+        let len = mem::size_of::<*mut T>();
+        let ptr = match len {
+            4 => u32::arbitrary(u)? as *mut T,
+            8 => u64::arbitrary(u)? as *mut T,
+            _ => unimplemented!()
+        };
+        Ok(ptr)
+    }
+
+    #[inline]
+    fn size_hint(_depth: usize) -> (usize, Option<usize>) {
+        let len = mem::size_of::<*mut T>();
+        (len, Some(len))
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -1234,5 +1252,12 @@ mod test {
             (1 + mem::size_of::<usize>(), None),
             <(u8, Vec<u8>) as Arbitrary>::size_hint(0)
         );
+    }
+
+    #[test]
+    fn arbitrary_pointers() {
+        let x = [1, 2, 3, 4];
+        assert_eq!(<*mut i64 as Arbitrary>::arbitrary(&mut Unstructured::new(&x)).unwrap(), 0x4030201 as *mut i64);
+        assert_eq!(<*mut Box<u64> as Arbitrary>::arbitrary(&mut Unstructured::new(&x)).unwrap(), 0x4030201 as *mut Box<u64>)
     }
 }

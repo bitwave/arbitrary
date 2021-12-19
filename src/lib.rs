@@ -60,6 +60,7 @@ use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedL
 #[cfg(feature = "std")]
 use std::ffi::{CString, OsString};
 
+#[cfg(feature = "std")]
 use std::hash::BuildHasher;
 #[cfg(feature = "std")]
 use std::net::{Ipv4Addr, Ipv6Addr};

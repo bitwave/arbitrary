@@ -784,7 +784,11 @@ where
     }
 
     fn dearbitrary(&self) -> Vec<u8> {
-        unimplemented!()
+        let mut v = Vec::new();
+        for x in self {
+            v.append(&mut x.dearbitrary());
+        }
+        v
     }
 
     #[inline]
@@ -1617,5 +1621,22 @@ mod test {
         let mut buf = Unstructured::new(&data);
         let expected = <(bool, u64)>::arbitrary(&mut buf).unwrap();
         assert_eq!(expected, x);
+    }
+
+    #[test]
+    fn dearbitrary_arrays() {
+        let x = [9, 0, 1, 2, 3, 4, 5, 6, 7, 8];
+        let mut buf = Unstructured::new(&x);
+        let t = <[u8; 10]>::arbitrary(&mut buf).unwrap();
+        let actual = Arbitrary::dearbitrary(&t);
+
+        assert_eq!(x.to_vec(), actual);
+
+        let x = [9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 11];
+        let mut buf = Unstructured::new(&x);
+        let t = <[u32; 3]>::arbitrary(&mut buf).unwrap();
+        let actual = Arbitrary::dearbitrary(&t);
+
+        assert_eq!(x.to_vec(), actual);
     }
 }
